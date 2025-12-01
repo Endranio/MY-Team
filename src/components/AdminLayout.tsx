@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Gamepad2, LayoutDashboard, Users, Calendar, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -11,6 +12,7 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
+  const { signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const menuItems = [
@@ -72,6 +74,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         <div className="absolute bottom-4 left-4 right-4">
           <Button
             variant="ghost"
+            onClick={signOut}
             className={cn(
               "w-full justify-start gap-3 hover:bg-destructive/10 hover:text-destructive",
               !sidebarOpen && "justify-center"

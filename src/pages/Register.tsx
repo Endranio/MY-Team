@@ -1,12 +1,16 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gamepad2 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Gamepad2, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Register = () => {
+  const { signUp, user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -14,10 +18,22 @@ const Register = () => {
     confirmPassword: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Functionality will be added later
-    console.log("Register attempt:", formData);
+    
+    if (formData.password !== formData.confirmPassword) {
+      return;
+    }
+
+    setLoading(true);
+    await signUp(formData.email, formData.password, formData.name);
+    setLoading(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,6 +64,7 @@ const Register = () => {
               value={formData.name}
               onChange={handleChange}
               required
+              disabled={loading}
               className="bg-secondary border-border focus:border-primary"
             />
           </div>
@@ -61,6 +78,7 @@ const Register = () => {
               value={formData.email}
               onChange={handleChange}
               required
+              disabled={loading}
               className="bg-secondary border-border focus:border-primary"
             />
           </div>
@@ -74,6 +92,8 @@ const Register = () => {
               value={formData.password}
               onChange={handleChange}
               required
+              minLength={6}
+              disabled={loading}
               className="bg-secondary border-border focus:border-primary"
             />
           </div>
@@ -87,11 +107,16 @@ const Register = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               required
+              disabled={loading}
               className="bg-secondary border-border focus:border-primary"
             />
+            {formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword && (
+              <p className="text-sm text-destructive">Password tidak cocok</p>
+            )}
           </div>
 
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 shadow-[var(--glow-primary)]">
+          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 shadow-[var(--glow-primary)]" disabled={loading}>
+            {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Create Account
           </Button>
         </form>
