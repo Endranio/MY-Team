@@ -1,8 +1,47 @@
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Users, Calendar, TrendingUp, Gamepad2 } from "lucide-react";
+import { Users, Calendar, TrendingUp, Gamepad2, Loader2 } from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const AdminDashboard = () => {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalEvents: 0,
+    activeGames: 12,
+    growth: "+23%"
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [usersResult, eventsResult] = await Promise.all([
+          supabase.from('profiles').select('id', { count: 'exact', head: true }),
+          supabase.from('events').select('id', { count: 'exact', head: true })
+        ]);
+
+        setStats({
+          totalUsers: usersResult.count || 0,
+          totalEvents: eventsResult.count || 0,
+          activeGames: 12,
+          growth: "+23%"
+        });
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Gagal memuat statistik",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -12,47 +51,53 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6">
-          <Card className="p-6 bg-card border-border hover:border-primary/50 transition-colors">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Users</p>
-                <p className="text-3xl font-bold mt-1">1,234</p>
+        {loading ? (
+          <div className="flex justify-center items-center min-h-[200px]">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-4 gap-6">
+            <Card className="p-6 bg-card border-border hover:border-primary/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Users</p>
+                  <p className="text-3xl font-bold mt-1">{stats.totalUsers}</p>
+                </div>
+                <Users className="h-10 w-10 text-primary" />
               </div>
-              <Users className="h-10 w-10 text-primary" />
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="p-6 bg-card border-border hover:border-primary/50 transition-colors">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Events</p>
-                <p className="text-3xl font-bold mt-1">45</p>
+            <Card className="p-6 bg-card border-border hover:border-primary/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Events</p>
+                  <p className="text-3xl font-bold mt-1">{stats.totalEvents}</p>
+                </div>
+                <Calendar className="h-10 w-10 text-primary" />
               </div>
-              <Calendar className="h-10 w-10 text-primary" />
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="p-6 bg-card border-border hover:border-primary/50 transition-colors">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Active Games</p>
-                <p className="text-3xl font-bold mt-1">12</p>
+            <Card className="p-6 bg-card border-border hover:border-primary/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Active Games</p>
+                  <p className="text-3xl font-bold mt-1">{stats.activeGames}</p>
+                </div>
+                <Gamepad2 className="h-10 w-10 text-primary" />
               </div>
-              <Gamepad2 className="h-10 w-10 text-primary" />
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="p-6 bg-card border-border hover:border-primary/50 transition-colors">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Growth</p>
-                <p className="text-3xl font-bold mt-1">+23%</p>
+            <Card className="p-6 bg-card border-border hover:border-primary/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Growth</p>
+                  <p className="text-3xl font-bold mt-1">{stats.growth}</p>
+                </div>
+                <TrendingUp className="h-10 w-10 text-primary" />
               </div>
-              <TrendingUp className="h-10 w-10 text-primary" />
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
+        )}
 
         {/* Recent Activity */}
         <Card className="p-6 bg-card border-border">
