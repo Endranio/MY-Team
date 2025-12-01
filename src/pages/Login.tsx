@@ -1,19 +1,34 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gamepad2 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Gamepad2, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
+  const { signIn, user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Functionality will be added later
-    console.log("Login attempt:", { email, password });
+    setLoading(true);
+    const { error } = await signIn(email, password);
+    setLoading(false);
+    
+    if (!error) {
+      navigate('/dashboard');
+    }
   };
 
   return (
@@ -37,6 +52,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
               className="bg-secondary border-border focus:border-primary"
             />
           </div>
@@ -50,11 +66,13 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
               className="bg-secondary border-border focus:border-primary"
             />
           </div>
 
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 shadow-[var(--glow-primary)]">
+          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 shadow-[var(--glow-primary)]" disabled={loading}>
+            {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Login
           </Button>
         </form>
