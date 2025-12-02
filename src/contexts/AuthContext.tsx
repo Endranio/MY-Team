@@ -9,9 +9,10 @@ interface AuthContextType {
   session: Session | null;
   isAdmin: boolean;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, phone: string, city: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,38 +24,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Check admin role when session changes
-        if (session?.user) {
-          setTimeout(() => {
-            checkAdminRole(session.user.id);
-          }, 0);
-        } else {
-          setIsAdmin(false);
-        }
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdminRole(session.user.id);
-      }
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   const checkAdminRole = async (userId: string) => {
+    console.log('🔍 Checking admin role for user:', userId);
     try {
       const { data, error } = await supabase
         .from('user_roles')
@@ -62,19 +33,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .eq('user_id', userId)
         .eq('role', 'admin')
         .maybeSingle();
-      
+
+      console.log('📊 Admin role query result:', { data, error });
+
       if (error) throw error;
-      setIsAdmin(!!data);
+      const adminStatus = !!data;
+      setIsAdmin(adminStatus);
+      console.log('✅ isAdmin set to:', adminStatus);
     } catch (error) {
-      console.error('Error checking admin role:', error);
+      console.error('❌ Error checking admin role:', error);
       setIsAdmin(false);
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        // Check admin role when session changes
+        if (session?.user) {
+          checkAdminRole(session.user.id);
+        } else {
+          setIsAdmin(false);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        await checkAdminRole(session.user.id);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signUp = async (email: string, password: string, fullName: string, phone: string, city: string) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -82,17 +86,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
+            phone: phone,
+            city: city,
           }
         }
       });
-      
+
       if (error) throw error;
-      
+
       toast({
         title: "Akun berhasil dibuat!",
         description: "Silakan login untuk melanjutkan.",
       });
-      
+
       navigate('/login');
       return { error: null };
     } catch (error: any) {
@@ -111,14 +117,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
       });
-      
+
       if (error) throw error;
-      
+
       toast({
         title: "Login berhasil!",
         description: "Selamat datang kembali.",
       });
-      
+
       return { error: null };
     } catch (error: any) {
       toast({
@@ -126,6 +132,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         title: "Error",
         description: error.message || "Email atau password salah",
       });
+      return { error };
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      return { error: null };
+    } catch (error: any) {
       return { error };
     }
   };
@@ -149,7 +169,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, loading, signUp, signIn, signOut, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );

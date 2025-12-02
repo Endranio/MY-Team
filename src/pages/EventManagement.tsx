@@ -94,7 +94,7 @@ const EventManagement = () => {
             <h2 className="text-3xl font-bold mb-2">Event Management</h2>
             <p className="text-muted-foreground">Buat dan kelola event komunitas</p>
           </div>
-          <Button 
+          <Button
             className="bg-primary hover:bg-primary/90"
             onClick={() => {
               setSelectedEvent(null);
@@ -119,8 +119,8 @@ const EventManagement = () => {
             {events.map((event) => (
               <Card key={event.id} className="overflow-hidden bg-card border-border hover:border-primary/50 transition-all duration-300">
                 <div className="aspect-video overflow-hidden">
-                  <img 
-                    src={event.image_url} 
+                  <img
+                    src={event.image_url}
                     alt={event.title}
                     className="w-full h-full object-cover"
                   />
@@ -128,27 +128,27 @@ const EventManagement = () => {
                 <div className="p-6 space-y-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    <span>{new Date(event.event_date).toLocaleDateString('id-ID', { 
-                      day: 'numeric', 
-                      month: 'long', 
-                      year: 'numeric' 
+                    <span>{new Date(event.event_date).toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
                     })}</span>
                   </div>
                   <h3 className="text-xl font-bold">{event.title}</h3>
                   <p className="text-muted-foreground text-sm line-clamp-2">{event.description}</p>
                   <div className="flex gap-2 pt-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex-1 border-primary/50 hover:bg-primary/10"
                       onClick={() => handleEdit(event)}
                     >
                       <Pencil className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex-1 border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
                       onClick={() => openDeleteDialog(event)}
                     >

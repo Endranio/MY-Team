@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Gamepad2, Calendar, LogOut, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import EventDetailsDialog from "@/components/EventDetailsDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,33 +87,43 @@ const UserDashboard = () => {
             <p className="text-muted-foreground">Belum ada event tersedia.</p>
           </Card>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {events.map((event) => (
-              <Card key={event.id} className="overflow-hidden bg-card border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20">
-                <div className="aspect-video overflow-hidden">
-                  <img 
-                    src={event.image_url} 
+              <Card key={event.id} className="group overflow-hidden bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 flex flex-col h-full">
+                <div className="relative aspect-video overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <img
+                    src={event.image_url}
                     alt={event.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                   />
+                  <Badge className="absolute top-4 right-4 z-20 bg-black/50 backdrop-blur-md border-white/10 text-white hover:bg-black/70 transition-colors">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    {new Date(event.event_date).toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'short'
+                    })}
+                  </Badge>
                 </div>
-                <div className="p-6 space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>{new Date(event.event_date).toLocaleDateString('id-ID', { 
-                      day: 'numeric', 
-                      month: 'long', 
-                      year: 'numeric' 
-                    })}</span>
+
+                <div className="p-6 flex flex-col flex-grow space-y-4">
+                  <div className="space-y-2 flex-grow">
+                    <h3 className="text-xl font-bold group-hover:text-primary transition-colors line-clamp-1" title={event.title}>
+                      {event.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed">
+                      {event.description}
+                    </p>
                   </div>
-                  <h3 className="text-xl font-bold">{event.title}</h3>
-                  <p className="text-muted-foreground line-clamp-2">{event.description}</p>
-                  <Button 
-                    className="w-full bg-primary hover:bg-primary/90"
-                    onClick={() => handleViewDetails(event)}
-                  >
-                    Lihat Detail
-                  </Button>
+
+                  <div className="pt-4 mt-auto">
+                    <Button
+                      className="w-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-medium group-hover:translate-y-0 translate-y-1"
+                      onClick={() => handleViewDetails(event)}
+                    >
+                      Lihat Detail
+                    </Button>
+                  </div>
                 </div>
               </Card>
             ))}
