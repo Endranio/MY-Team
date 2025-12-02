@@ -39,7 +39,7 @@ const Index = () => {
 
       {/* Stats Section */}
       <section className="container mx-auto px-4 py-16">
-        <div className="w-[50%] mx-auto grid grid-cols-2 md:grid-cols-3 gap-8">
+        <div className="w-[50%] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center space-y-2">
             <div className="text-4xl font-bold text-primary">700+</div>
             <div className="text-muted-foreground">Anggota Aktif</div>
@@ -183,7 +183,7 @@ const Index = () => {
             Mulailah perjalanan gaming Anda dengan MY Team hari ini. Terhubung dengan pemain, ikuti turnamen, dan menjadi bagian dari komunitas yang luar biasa.
           </p>
           <Link to="/register">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-12">
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-4 md:px-12">
               Buat Akun Anda Sekarang
             </Button>
           </Link>
