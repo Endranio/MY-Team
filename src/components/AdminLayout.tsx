@@ -24,9 +24,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside 
+      <aside
         className={cn(
-          "bg-card border-r border-border transition-all duration-300",
+          "bg-card border-r border-border transition-all duration-300 flex flex-col",
           sidebarOpen ? "w-64" : "w-20"
         )}
       >
@@ -39,8 +39,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               </h1>
             </div>
           )}
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="hover:bg-primary/10"
@@ -71,13 +71,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           })}
         </nav>
 
-        <div className="absolute bottom-4 left-4 right-4">
+        <div className="mt-auto p-4">
           <Button
             variant="ghost"
             onClick={signOut}
             className={cn(
-              "w-full justify-start gap-3 hover:bg-destructive/10 hover:text-destructive",
-              !sidebarOpen && "justify-center"
+              "w-full justify-start gap-3 hover:bg-destructive/10 hover:text-destructive transition-colors",
+              !sidebarOpen && "justify-center px-2"
             )}
           >
             <LogOut className="h-5 w-5" />
