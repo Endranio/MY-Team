@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, LayoutDashboard, Users, Calendar, LogOut, Menu } from "lucide-react";
+import { Gamepad2, LayoutDashboard, Users, Calendar, UserCheck, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,6 +19,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
     { icon: Users, label: "User Management", path: "/admin/users" },
     { icon: Calendar, label: "Event Management", path: "/admin/events" },
+    { icon: UserCheck, label: "Referral Saya", path: "/admin/referrals" },
+    { icon: Users, label: "Tim Management", path: "/admin/teams" },
+    { icon: Users, label: "Tim Saya", path: "/admin/my-team" },
   ];
 
   return (
