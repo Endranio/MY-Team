@@ -12,6 +12,10 @@ import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserManagement from "./pages/UserManagement";
 import EventManagement from "./pages/EventManagement";
+import MyReferrals from "./pages/MyReferrals";
+import TeamManagement from "./pages/TeamManagement";
+import AdminTeamApproval from "./pages/AdminTeamApproval";
+import AdminMyTeam from "./pages/AdminMyTeam";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +49,26 @@ const App = () => (
             <Route path="/admin/events" element={
               <ProtectedRoute requireAdmin>
                 <EventManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/referrals" element={
+              <ProtectedRoute requireAdmin>
+                <MyReferrals />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/teams" element={
+              <ProtectedRoute requireAdmin>
+                <AdminTeamApproval />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/my-team" element={
+              <ProtectedRoute requireAdmin>
+                <AdminMyTeam />
+              </ProtectedRoute>
+            } />
+            <Route path="/team" element={
+              <ProtectedRoute>
+                <TeamManagement />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -3,11 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Gamepad2, Loader2, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
+interface Admin {
+  id: string;
+  full_name: string;
+}
 
 const Register = () => {
   const { signUp, user } = useAuth();
@@ -15,13 +28,16 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [loadingAdmins, setLoadingAdmins] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     city: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    referredBy: ""
   });
 
   useEffect(() => {
@@ -29,6 +45,39 @@ const Register = () => {
       navigate('/dashboard');
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        // Fetch admin user IDs from user_roles
+        const { data: adminRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'admin');
+
+        if (rolesError) throw rolesError;
+
+        if (adminRoles && adminRoles.length > 0) {
+          // Fetch profiles for admin users
+          const adminIds = adminRoles.map(role => role.user_id);
+          const { data: profiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', adminIds);
+
+          if (profilesError) throw profilesError;
+
+          setAdmins(profiles || []);
+        }
+      } catch (error) {
+        console.error('Error fetching admins:', error);
+      } finally {
+        setLoadingAdmins(false);
+      }
+    };
+
+    fetchAdmins();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +87,14 @@ const Register = () => {
     }
 
     setLoading(true);
-    await signUp(formData.email, formData.password, formData.name, formData.phone, formData.city);
+    await signUp(
+      formData.email,
+      formData.password,
+      formData.name,
+      formData.phone,
+      formData.city,
+      formData.referredBy || undefined
+    );
     setLoading(false);
   };
 
@@ -46,6 +102,13 @@ const Register = () => {
     setFormData({
       ...formData,
       [e.target.id]: e.target.value
+    });
+  };
+
+  const handleSelectChange = (value: string) => {
+    setFormData({
+      ...formData,
+      referredBy: value
     });
   };
 
@@ -117,6 +180,26 @@ const Register = () => {
                 disabled={loading}
                 className="bg-secondary border-border focus:border-primary"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="referredBy">Diajak Oleh</Label>
+              <Select
+                value={formData.referredBy}
+                onValueChange={handleSelectChange}
+                disabled={loading || loadingAdmins}
+              >
+                <SelectTrigger className="bg-secondary border-border focus:border-primary">
+                  <SelectValue placeholder={loadingAdmins ? "Memuat..." : "Pilih admin yang mengajak"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {admins.map((admin) => (
+                    <SelectItem key={admin.id} value={admin.id}>
+                      {admin.full_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

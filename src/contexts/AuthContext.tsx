@@ -9,7 +9,7 @@ interface AuthContextType {
   session: Session | null;
   isAdmin: boolean;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, phone: string, city: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, phone: string, city: string, referredBy?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, phone: string, city: string) => {
+  const signUp = async (email: string, password: string, fullName: string, phone: string, city: string, referredBy?: string) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
 
@@ -88,6 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             full_name: fullName,
             phone: phone,
             city: city,
+            referred_by: referredBy || null,
           }
         }
       });

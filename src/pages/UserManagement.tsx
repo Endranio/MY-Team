@@ -40,6 +40,8 @@ interface UserProfile {
   phone?: string;
   created_at: string;
   role: string;
+  referred_by?: string;
+  referrer_name?: string;
 }
 
 const UserManagement = () => {
@@ -73,6 +75,12 @@ const UserManagement = () => {
 
       if (profilesError) throw profilesError;
 
+      // Create a map of user IDs to names for referrer lookup
+      const profileMap = new Map<string, string>();
+      (profiles || []).forEach(profile => {
+        profileMap.set(profile.id, profile.full_name);
+      });
+
       const usersWithRoles = await Promise.all(
         (profiles || []).map(async (profile) => {
           const { data: roleData } = await supabase
@@ -83,7 +91,8 @@ const UserManagement = () => {
 
           return {
             ...profile,
-            role: roleData?.role || 'user'
+            role: roleData?.role || 'user',
+            referrer_name: profile.referred_by ? profileMap.get(profile.referred_by) || '-' : '-'
           };
         })
       );
@@ -271,6 +280,7 @@ const UserManagement = () => {
                     <TableHead>Nama</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>No. Telepon</TableHead>
+                    <TableHead>Diajak Oleh</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Tanggal Bergabung</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -284,6 +294,9 @@ const UserManagement = () => {
                         <TableCell className="text-muted-foreground">{user.email}</TableCell>
                         <TableCell className="text-muted-foreground">
                           {user.phone || "-"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {user.referrer_name || "-"}
                         </TableCell>
                         <TableCell>
                           <Select
@@ -316,7 +329,7 @@ const UserManagement = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                      <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                         Tidak ada user yang ditemukan.
                       </TableCell>
                     </TableRow>
