@@ -100,25 +100,25 @@ const Index = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section id="home" className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-          <h2 className="text-5xl md:text-6xl font-bold leading-tight">
+      <section id="home" className="container mx-auto px-3 sm:px-4 py-12 sm:py-20 text-center">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
             Gabung dengan Ultimate
             <span className="block bg-gradient-to-r from-primary via-blue-400 to-primary bg-clip-text text-transparent">
               MY Team
             </span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
             Terhubung dengan sesama gamer, ikuti acara eksklusif, dan menjadi bagian dari sesuatu yang lebih besar.
           </p>
-          <div className="flex gap-4 justify-center pt-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4 sm:pt-6 px-4 sm:px-0">
             <Link to="/register">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8 shadow-[var(--glow-primary)]">
+              <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-base sm:text-lg px-6 sm:px-8 shadow-[var(--glow-primary)]">
                 Mulai
               </Button>
             </Link>
             <Link to="/login">
-              <Button size="lg" variant="outline" className="text-lg px-8 border-primary/50 hover:bg-primary/10">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 border-primary/50 hover:bg-primary/10">
                 Masuk
               </Button>
             </Link>
@@ -127,33 +127,32 @@ const Index = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="w-[50%] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center space-y-2">
-            <div className="text-4xl font-bold text-primary">700+</div>
-            <div className="text-muted-foreground">Anggota Aktif</div>
+      <section className="container mx-auto px-3 sm:px-4 py-10 sm:py-16">
+        <div className="w-full sm:w-[80%] md:w-[50%] mx-auto grid grid-cols-3 gap-4 sm:gap-8">
+          <div className="text-center space-y-1 sm:space-y-2">
+            <div className="text-2xl sm:text-4xl font-bold text-primary">700+</div>
+            <div className="text-xs sm:text-base text-muted-foreground">Anggota Aktif</div>
           </div>
-          <div className="text-center space-y-2">
-            <div className="text-4xl font-bold text-primary">50+</div>
-            <div className="text-muted-foreground">Acara Diselenggarakan</div>
+          <div className="text-center space-y-1 sm:space-y-2">
+            <div className="text-2xl sm:text-4xl font-bold text-primary">50+</div>
+            <div className="text-xs sm:text-base text-muted-foreground">Acara</div>
           </div>
-
-          <div className="text-center space-y-2">
-            <div className="text-4xl font-bold text-primary">24/7</div>
-            <div className="text-muted-foreground">Dukungan</div>
+          <div className="text-center space-y-1 sm:space-y-2">
+            <div className="text-2xl sm:text-4xl font-bold text-primary">24/7</div>
+            <div className="text-xs sm:text-base text-muted-foreground">Dukungan</div>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="container mx-auto px-4 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">Mengapa Memilih MY Team?</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+      <section id="features" className="container mx-auto px-3 sm:px-4 py-12 sm:py-20">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4">Mengapa Memilih MY Team?</h2>
+          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
             Rasakan platform komunitas gaming terbaik dengan fitur yang dirancang untuk gamer, oleh gamer
           </p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8">
 
 
 
@@ -351,34 +350,34 @@ const Index = () => {
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" className="container mx-auto px-4 py-20 bg-muted/30">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">Apa Kata Anggota Kami</h2>
-          <p className="text-lg text-muted-foreground">
+      <section id="testimonials" className="container mx-auto px-3 sm:px-4 py-12 sm:py-20 bg-muted/30">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4">Apa Kata Anggota Kami</h2>
+          <p className="text-sm sm:text-lg text-muted-foreground px-2">
             Pengalaman nyata dari komunitas gaming kami
           </p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8 max-w-6xl mx-auto">
           {testimonials.length > 0 ? (
             testimonials.map((testimonial) => (
-              <Card key={testimonial.id} className="p-6 bg-card border-border">
-                <div className="flex gap-1 mb-4">
+              <Card key={testimonial.id} className="p-4 sm:p-6 bg-card border-border">
+                <div className="flex gap-1 mb-3 sm:mb-4">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-5 w-5 ${i < testimonial.rating ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
+                      className={`h-4 w-4 sm:h-5 sm:w-5 ${i < testimonial.rating ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
                     />
                   ))}
                 </div>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
                   "{testimonial.content}"
                 </p>
-                <div className="font-semibold">{testimonial.author_name}</div>
-                <div className="text-sm text-muted-foreground">{testimonial.author_role}</div>
+                <div className="font-semibold text-sm sm:text-base">{testimonial.author_name}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">{testimonial.author_role}</div>
               </Card>
             ))
           ) : (
-            <div className="col-span-3 text-center text-muted-foreground py-8">
+            <div className="col-span-full text-center text-muted-foreground py-8">
               Belum ada testimoni.
             </div>
           )}
@@ -386,24 +385,24 @@ const Index = () => {
       </section>
 
       {/* About Section */}
-      <section id="about" className="container mx-auto px-4 py-20">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-4xl font-bold">Tentang MY Team</h2>
-          <p className="text-lg text-muted-foreground leading-relaxed">
+      <section id="about" className="container mx-auto px-3 sm:px-4 py-12 sm:py-20">
+        <div className="max-w-3xl mx-auto text-center space-y-4 sm:space-y-6">
+          <h2 className="text-2xl sm:text-4xl font-bold">Tentang MY Team</h2>
+          <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed px-2">
             MY Team lebih dari sekadar komunitas—ini adalah rumah bagi gamer yang bersemangat. Kami menyelenggarakan acara rutin, menyediakan platform untuk kompetisi gaming, dan menciptakan koneksi bermakna antara pemain di seluruh dunia. Bergabunglah hari ini dan tingkatkan pengalaman gaming Anda.
           </p>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20">
-        <Card className="bg-gradient-to-r from-primary/10 to-blue-400/10 border-primary/20 p-12 text-center">
-          <h2 className="text-4xl font-bold mb-4">Siap Bergabung?</h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+      <section className="px-3 sm:px-4 py-12 sm:py-20">
+        <Card className="bg-gradient-to-r from-primary/10 to-blue-400/10 border-primary/20 p-6 sm:p-12 text-center">
+          <h2 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4">Siap Bergabung?</h2>
+          <p className="text-base sm:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
             Mulailah perjalanan gaming Anda dengan MY Team hari ini. Terhubung dengan pemain, ikuti turnamen, dan menjadi bagian dari komunitas yang luar biasa.
           </p>
           <Link to="/register">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-4 md:px-12">
+            <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-base sm:text-lg px-6 sm:px-12">
               Buat Akun Anda Sekarang
             </Button>
           </Link>
