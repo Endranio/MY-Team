@@ -94,27 +94,6 @@ const Footer = () => {
                                     anjasraharjo12345@gmail.com
                                 </a>
                             </div>
-                            <div className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                                <MessageCircle className="h-5 w-5 flex-shrink-0" />
-                                <div className="space-y-1">
-                                    <a
-                                        href="https://wa.me/6281234802812"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="block hover:underline"
-                                    >
-                                        +62 812-3480-2812
-                                    </a>
-                                    <a
-                                        href="https://wa.me/62882008589215"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="block hover:underline"
-                                    >
-                                        +62 882-0085-89215
-                                    </a>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

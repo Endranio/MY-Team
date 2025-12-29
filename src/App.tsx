@@ -12,6 +12,8 @@ import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserManagement from "./pages/UserManagement";
 import EventManagement from "./pages/EventManagement";
+import StreamManagement from "./pages/StreamManagement";
+import TestimonialManagement from "./pages/TestimonialManagement";
 import MyReferrals from "./pages/MyReferrals";
 import TeamManagement from "./pages/TeamManagement";
 import AdminTeamApproval from "./pages/AdminTeamApproval";
@@ -49,6 +51,16 @@ const App = () => (
             <Route path="/admin/events" element={
               <ProtectedRoute requireAdmin>
                 <EventManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/streams" element={
+              <ProtectedRoute requireAdmin>
+                <StreamManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/testimonials" element={
+              <ProtectedRoute requireAdmin>
+                <TestimonialManagement />
               </ProtectedRoute>
             } />
             <Route path="/admin/referrals" element={

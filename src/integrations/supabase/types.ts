@@ -47,6 +47,66 @@ export type Database = {
         }
         Relationships: []
       }
+      streams: {
+        Row: {
+          id: string
+          title: string
+          stream_url: string
+          platform: string
+          thumbnail_url: string | null
+          is_live: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          stream_url: string
+          platform?: string
+          thumbnail_url?: string | null
+          is_live?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          stream_url?: string
+          platform?: string
+          thumbnail_url?: string | null
+          is_live?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          id: string
+          author_name: string
+          author_role: string
+          content: string
+          rating: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          author_name: string
+          author_role: string
+          content: string
+          rating?: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          author_name?: string
+          author_role?: string
+          content?: string
+          rating?: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
