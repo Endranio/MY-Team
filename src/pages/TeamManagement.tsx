@@ -25,7 +25,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Users, Crown, Plus, LogOut, Loader2, Search, UserPlus, Shield, Clock, Check, X, Upload, UserMinus } from "lucide-react";
+import { Users, Crown, Plus, LogOut, Loader2, Search, UserPlus, Shield, Clock, Check, X, Upload, UserMinus, Trash2, Edit2, Camera } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -75,6 +75,51 @@ const TeamManagement = ({ isAdminPage = false }: TeamManagementProps) => {
         team_description: "",
         team_logo: null as File | null,
     });
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+    // Edit Team State
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [editLoading, setEditLoading] = useState(false);
+    const [editTeamData, setEditTeamData] = useState({
+        team_name: "",
+        team_description: "",
+        team_logo: null as File | null,
+    });
+    const [editLogoPreview, setEditLogoPreview] = useState<string | null>(null);
+
+    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit = false) => {
+        const file = e.target.files?.[0] || null;
+        if (isEdit) {
+            setEditTeamData(prev => ({ ...prev, team_logo: file }));
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => setEditLogoPreview(reader.result as string);
+                reader.readAsDataURL(file);
+            } else {
+                setEditLogoPreview(null);
+            }
+        } else {
+            setNewTeam(prev => ({ ...prev, team_logo: file }));
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => setLogoPreview(reader.result as string);
+                reader.readAsDataURL(file);
+            } else {
+                setLogoPreview(null);
+            }
+        }
+    };
+
+    const openEditDialog = () => {
+        if (!myTeam) return;
+        setEditTeamData({
+            team_name: myTeam.team_name,
+            team_description: myTeam.team_description || "",
+            team_logo: null,
+        });
+        setEditLogoPreview(myTeam.team_logo);
+        setEditDialogOpen(true);
+    };
 
     // Check user's current team status
     const checkUserTeamStatus = async () => {
@@ -112,8 +157,8 @@ const TeamManagement = ({ isAdminPage = false }: TeamManagementProps) => {
 
                 setMyTeam({ ...team, captain: captain || undefined });
 
-                // If user is in an active approved team, fetch members
-                if (membership.status === "active" && team.status === "approved") {
+                // If user is in an active approved team (or pending approval), fetch members
+                if ((membership.status === "active" || membership.status === "pending") && team.status === "approved") {
                     await fetchTeamMembers(team.id);
 
                     // If user is captain, fetch pending join requests
@@ -308,6 +353,7 @@ const TeamManagement = ({ isAdminPage = false }: TeamManagementProps) => {
 
             setCreateDialogOpen(false);
             setNewTeam({ team_name: "", team_description: "", team_logo: null });
+            setLogoPreview(null);
             checkUserTeamStatus();
         } catch (error: any) {
             toast({
@@ -488,31 +534,76 @@ const TeamManagement = ({ isAdminPage = false }: TeamManagementProps) => {
         }
     };
 
+    const handleKickMember = async (memberId: string, memberName: string) => {
+        if (!user || !myTeam) return;
+
+        try {
+            const { error } = await supabase
+                .from("team_members")
+                .delete()
+                .eq("id", memberId)
+                .eq("team_id", myTeam.id);
+
+            if (error) throw error;
+
+            await supabase.from("team_audit_logs").insert({
+                team_id: myTeam.id,
+                user_id: user.id,
+                action: "member_removed",
+                details: { removed_member_name: memberName },
+            });
+
+            toast({ title: `Anggota ${memberName} berhasil dikeluarkan.` });
+
+            // Optimistic update
+            setTeamMembers(prev => prev.filter(m => m.id !== memberId));
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error.message || "Gagal mengeluarkan anggota.",
+            });
+        }
+    };
+
     const handleTransferCaptain = async (newCaptainId: string) => {
         if (!user || !myTeam) return;
 
         try {
             // Update old captain to member
-            await supabase
+            const { error: oldCaptainError } = await supabase
                 .from("team_members")
                 .update({ role_in_team: "member" })
                 .eq("team_id", myTeam.id)
                 .eq("user_id", user.id);
 
+            if (oldCaptainError) {
+                console.error("Failed to update old captain:", oldCaptainError);
+                throw oldCaptainError;
+            }
+
             // Update new captain
-            await supabase
+            const { error: newCaptainError } = await supabase
                 .from("team_members")
                 .update({ role_in_team: "captain" })
                 .eq("team_id", myTeam.id)
                 .eq("user_id", newCaptainId);
 
+            if (newCaptainError) {
+                console.error("Failed to update new captain:", newCaptainError);
+                throw newCaptainError;
+            }
+
             // Update team captain_id
-            const { error } = await supabase
+            const { error: teamError } = await supabase
                 .from("teams")
                 .update({ captain_id: newCaptainId })
                 .eq("id", myTeam.id);
 
-            if (error) throw error;
+            if (teamError) {
+                console.error("Failed to update team captain_id:", teamError);
+                throw teamError;
+            }
 
             await supabase.from("team_audit_logs").insert({
                 team_id: myTeam.id,
@@ -527,8 +618,69 @@ const TeamManagement = ({ isAdminPage = false }: TeamManagementProps) => {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: error.message,
+                description: error.message || "Gagal memindahkan kapten. Silakan coba lagi.",
             });
+        }
+    };
+
+    const handleUpdateTeam = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user || !myTeam) return;
+
+        setEditLoading(true);
+        try {
+            let logoUrl = myTeam.team_logo;
+
+            // Upload new logo if provided
+            if (editTeamData.team_logo) {
+                const fileExt = editTeamData.team_logo.name.split(".").pop();
+                const fileName = `${user.id}/${Date.now()}_edit.${fileExt}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from("team-logos")
+                    .upload(fileName, editTeamData.team_logo);
+
+                if (uploadError) throw uploadError;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from("team-logos")
+                    .getPublicUrl(fileName);
+
+                logoUrl = publicUrl;
+            }
+
+            const { error } = await supabase
+                .from("teams")
+                .update({
+                    team_name: editTeamData.team_name,
+                    team_description: editTeamData.team_description,
+                    team_logo: logoUrl
+                })
+                .eq("id", myTeam.id);
+
+            if (error) throw error;
+
+            await supabase.from("team_audit_logs").insert({
+                team_id: myTeam.id,
+                user_id: user.id,
+                action: "team_updated",
+                details: {
+                    old_name: myTeam.team_name,
+                    new_name: editTeamData.team_name
+                }
+            });
+
+            toast({ title: "Tim berhasil diperbarui!" });
+            setEditDialogOpen(false);
+            checkUserTeamStatus();
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error.message || "Gagal memperbarui tim",
+            });
+        } finally {
+            setEditLoading(false);
         }
     };
 
@@ -552,6 +704,73 @@ const TeamManagement = ({ isAdminPage = false }: TeamManagementProps) => {
         return (
             <div>
                 {!isAdminPage && <Header />}
+
+                {/* Edit Team Dialog */}
+                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                    <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle>Edit Tim</DialogTitle>
+                            <DialogDescription>
+                                Perbarui informasi tim Anda di sini.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleUpdateTeam} className="space-y-4 py-4">
+                            <div className="flex justify-center mb-6">
+                                <div className="relative group cursor-pointer">
+                                    <Avatar className="h-24 w-24 border-2 border-border group-hover:border-primary transition-all">
+                                        <AvatarImage src={editLogoPreview || undefined} />
+                                        <AvatarFallback className="text-2xl">
+                                            {editTeamData.team_name.charAt(0).toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Camera className="h-8 w-8 text-white" />
+                                    </div>
+                                    <Input
+                                        type="file"
+                                        accept="image/*"
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        onChange={(e) => handleLogoChange(e, true)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-name">Nama Tim</Label>
+                                <Input
+                                    id="edit-name"
+                                    value={editTeamData.team_name}
+                                    onChange={(e) => setEditTeamData({ ...editTeamData, team_name: e.target.value })}
+                                    placeholder="Masukkan nama tim"
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-desc">Deskripsi</Label>
+                                <Textarea
+                                    id="edit-desc"
+                                    value={editTeamData.team_description}
+                                    onChange={(e) => setEditTeamData({ ...editTeamData, team_description: e.target.value })}
+                                    placeholder="Ceritakan tentang tim Anda..."
+                                    className="resize-none"
+                                    rows={3}
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-3 mt-6">
+                                <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                                    Batal
+                                </Button>
+                                <Button type="submit" disabled={editLoading}>
+                                    {editLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                    Simpan Perubahan
+                                </Button>
+                            </div>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+
                 <div className={isAdminPage ? "space-y-6" : "space-y-6 m-6"}>
                     {/* Team Status Banner */}
                     {isPending && (
@@ -602,10 +821,16 @@ const TeamManagement = ({ isAdminPage = false }: TeamManagementProps) => {
                                         {myTeam.status === "approved" ? "Aktif" : myTeam.status === "pending" ? "Pending" : "Ditolak"}
                                     </Badge>
                                     {isCaptain && (
-                                        <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/50">
-                                            <Crown className="h-3 w-3 mr-1" />
-                                            Kapten
-                                        </Badge>
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/50">
+                                                <Crown className="h-3 w-3 mr-1" />
+                                                Kapten
+                                            </Badge>
+                                            <Button size="sm" variant="ghost" onClick={openEditDialog}>
+                                                <Edit2 className="h-3 w-3 mr-1" />
+                                                Edit Tim
+                                            </Button>
+                                        </div>
                                     )}
                                 </div>
                                 <CardDescription className="mt-1">
@@ -653,29 +878,58 @@ const TeamManagement = ({ isAdminPage = false }: TeamManagementProps) => {
                                                         </Badge>
                                                     )}
                                                     {isCaptain && member.user_id !== user?.id && (
-                                                        <AlertDialog>
-                                                            <AlertDialogTrigger asChild>
-                                                                <Button size="sm" variant="outline">
-                                                                    <Crown className="h-3 w-3 mr-1" />
-                                                                    Jadikan Kapten
-                                                                </Button>
-                                                            </AlertDialogTrigger>
-                                                            <AlertDialogContent>
-                                                                <AlertDialogHeader>
-                                                                    <AlertDialogTitle>Transfer Kapten?</AlertDialogTitle>
-                                                                    <AlertDialogDescription>
-                                                                        Anda akan menyerahkan posisi kapten kepada {member.profile?.full_name}.
-                                                                        Anda akan menjadi anggota biasa setelah ini.
-                                                                    </AlertDialogDescription>
-                                                                </AlertDialogHeader>
-                                                                <AlertDialogFooter>
-                                                                    <AlertDialogCancel>Batal</AlertDialogCancel>
-                                                                    <AlertDialogAction onClick={() => handleTransferCaptain(member.user_id)}>
-                                                                        Transfer
-                                                                    </AlertDialogAction>
-                                                                </AlertDialogFooter>
-                                                            </AlertDialogContent>
-                                                        </AlertDialog>
+                                                        <>
+                                                            <AlertDialog>
+                                                                <AlertDialogTrigger asChild>
+                                                                    <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                                                                        <Trash2 className="h-3 w-3 mr-1" />
+                                                                        Keluarkan
+                                                                    </Button>
+                                                                </AlertDialogTrigger>
+                                                                <AlertDialogContent>
+                                                                    <AlertDialogHeader>
+                                                                        <AlertDialogTitle>Keluarkan Anggota?</AlertDialogTitle>
+                                                                        <AlertDialogDescription>
+                                                                            Apakah Anda yakin ingin mengeluarkan {member.profile?.full_name} dari tim?
+                                                                            Mereka harus meminta bergabung lagi jika ingin kembali.
+                                                                        </AlertDialogDescription>
+                                                                    </AlertDialogHeader>
+                                                                    <AlertDialogFooter>
+                                                                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                                                                        <AlertDialogAction
+                                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                            onClick={() => handleKickMember(member.id, member.profile?.full_name || "Anggota")}
+                                                                        >
+                                                                            Keluarkan
+                                                                        </AlertDialogAction>
+                                                                    </AlertDialogFooter>
+                                                                </AlertDialogContent>
+                                                            </AlertDialog>
+
+                                                            <AlertDialog>
+                                                                <AlertDialogTrigger asChild>
+                                                                    <Button size="sm" variant="outline">
+                                                                        <Crown className="h-3 w-3 mr-1" />
+                                                                        Jadikan Kapten
+                                                                    </Button>
+                                                                </AlertDialogTrigger>
+                                                                <AlertDialogContent>
+                                                                    <AlertDialogHeader>
+                                                                        <AlertDialogTitle>Transfer Kapten?</AlertDialogTitle>
+                                                                        <AlertDialogDescription>
+                                                                            Anda akan menyerahkan posisi kapten kepada {member.profile?.full_name}.
+                                                                            Anda akan menjadi anggota biasa setelah ini.
+                                                                        </AlertDialogDescription>
+                                                                    </AlertDialogHeader>
+                                                                    <AlertDialogFooter>
+                                                                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                                                                        <AlertDialogAction onClick={() => handleTransferCaptain(member.user_id)}>
+                                                                            Transfer
+                                                                        </AlertDialogAction>
+                                                                    </AlertDialogFooter>
+                                                                </AlertDialogContent>
+                                                            </AlertDialog>
+                                                        </>
                                                     )}
                                                 </div>
                                             </div>
@@ -826,8 +1080,29 @@ const TeamManagement = ({ isAdminPage = false }: TeamManagementProps) => {
                                         id="team_logo"
                                         type="file"
                                         accept="image/*"
-                                        onChange={(e) => setNewTeam({ ...newTeam, team_logo: e.target.files?.[0] || null })}
+                                        onChange={handleLogoChange}
                                     />
+                                    {logoPreview && (
+                                        <div className="mt-3 flex justify-center">
+                                            <div className="relative">
+                                                <img
+                                                    src={logoPreview}
+                                                    alt="Logo preview"
+                                                    className="w-24 h-24 rounded-lg object-cover border-2 border-primary/20"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setNewTeam(prev => ({ ...prev, team_logo: null }));
+                                                        setLogoPreview(null);
+                                                    }}
+                                                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-destructive/90"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <Button type="submit" className="w-full" disabled={createLoading}>
                                     {createLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
