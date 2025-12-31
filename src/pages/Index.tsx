@@ -100,28 +100,50 @@ const Index = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section id="home" className="container mx-auto px-3 sm:px-4 py-12 sm:py-20 text-center">
-        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
-            Gabung dengan Ultimate
-            <span className="block bg-gradient-to-r from-primary via-blue-400 to-primary bg-clip-text text-transparent">
-              MY Team
-            </span>
-          </h2>
-          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
-            Terhubung dengan sesama gamer, ikuti acara eksklusif, dan menjadi bagian dari sesuatu yang lebih besar.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4 sm:pt-6 px-4 sm:px-0">
-            <Link to="/register">
-              <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-base sm:text-lg px-6 sm:px-8 shadow-[var(--glow-primary)]">
-                Mulai
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 border-primary/50 hover:bg-primary/10">
-                Masuk
-              </Button>
-            </Link>
+      <section id="home" className="relative min-h-[80vh] sm:min-h-[90vh] flex items-center justify-center overflow-hidden">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/232036.jpg')" }}
+        />
+
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-transparent to-background/90" />
+
+        {/* Radial Glow Effect */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent opacity-60" />
+
+        {/* Content */}
+        <div className="relative z-10 container mx-auto px-3 sm:px-4 py-12 sm:py-20 text-center">
+          <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-fade-in">
+            {/* Badge */}
+
+
+            <h2 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight drop-shadow-2xl">
+              Gabung dengan Ultimate
+              <span className="block bg-gradient-to-r from-primary via-blue-400 to-primary bg-clip-text text-transparent drop-shadow-lg">
+                MY Team
+              </span>
+            </h2>
+            <p className="text-base sm:text-xl text-muted-foreground/90 max-w-2xl mx-auto px-2 backdrop-blur-sm">
+              Terhubung dengan sesama gamer, ikuti acara eksklusif, dan menjadi bagian dari sesuatu yang lebih besar.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4 sm:pt-6 px-4 sm:px-0">
+              <Link to="/register">
+                <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-base sm:text-lg px-8 sm:px-10 shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 hover:scale-105">
+                  Mulai Sekarang
+                </Button>
+              </Link>
+              <Link to="/login">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto text-base sm:text-lg px-8 sm:px-10 border-primary/50 hover:bg-primary/10 backdrop-blur-sm hover:scale-105 transition-all duration-300">
+                  Masuk
+                </Button>
+              </Link>
+            </div>
+
+            {/* Scroll Indicator */}
+
           </div>
         </div>
       </section>
