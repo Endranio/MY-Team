@@ -14,6 +14,7 @@ import UserManagement from "./pages/UserManagement";
 import EventManagement from "./pages/EventManagement";
 import StreamManagement from "./pages/StreamManagement";
 import TestimonialManagement from "./pages/TestimonialManagement";
+import InfoCardManagement from "./pages/InfoCardManagement";
 import MyReferrals from "./pages/MyReferrals";
 import TeamManagement from "./pages/TeamManagement";
 import AdminTeamApproval from "./pages/AdminTeamApproval";
@@ -61,6 +62,11 @@ const App = () => (
             <Route path="/admin/testimonials" element={
               <ProtectedRoute requireAdmin>
                 <TestimonialManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/info-cards" element={
+              <ProtectedRoute requireAdmin>
+                <InfoCardManagement />
               </ProtectedRoute>
             } />
             <Route path="/admin/referrals" element={
