@@ -121,4 +121,229 @@ All colors MUST be HSL.
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground));
   }
+
+  /* ================================
+     Scroll Animation Utilities
+     Best Practice: Using CSS transforms for GPU acceleration
+     ================================ */
+
+  /* Base animation state - hidden */
+  .scroll-animate {
+    opacity: 0;
+    transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+      filter 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform, filter;
+  }
+
+  /* Visible state */
+  .scroll-animate.is-visible {
+    opacity: 1;
+  }
+
+  /* Fade Up Animation - More subtle */
+  .animate-fade-up {
+    transform: translateY(30px);
+  }
+
+  .animate-fade-up.is-visible {
+    transform: translateY(0);
+  }
+
+  /* Fade Down Animation */
+  .animate-fade-down {
+    transform: translateY(-30px);
+  }
+
+  .animate-fade-down.is-visible {
+    transform: translateY(0);
+  }
+
+  /* Fade Left Animation */
+  .animate-fade-left {
+    transform: translateX(-30px);
+  }
+
+  .animate-fade-left.is-visible {
+    transform: translateX(0);
+  }
+
+  /* Fade Right Animation */
+  .animate-fade-right {
+    transform: translateX(30px);
+  }
+
+  .animate-fade-right.is-visible {
+    transform: translateX(0);
+  }
+
+  /* Scale In Animation - More subtle */
+  .animate-scale-in {
+    transform: scale(0.95);
+  }
+
+  .animate-scale-in.is-visible {
+    transform: scale(1);
+  }
+
+  /* Blur In Animation - Smoother */
+  .animate-blur-in {
+    filter: blur(8px);
+    transform: translateY(15px);
+  }
+
+  .animate-blur-in.is-visible {
+    filter: blur(0);
+    transform: translateY(0);
+  }
+
+  /* Zoom Fade Animation */
+  .animate-zoom-fade {
+    transform: scale(0.92);
+    filter: blur(3px);
+  }
+
+  .animate-zoom-fade.is-visible {
+    transform: scale(1);
+    filter: blur(0);
+  }
+
+  /* Rotate In Animation - NEW */
+  .animate-rotate-in {
+    transform: rotate(-5deg) translateY(20px);
+  }
+
+  .animate-rotate-in.is-visible {
+    transform: rotate(0) translateY(0);
+  }
+
+  /* Slide Reveal Animation - NEW */
+  .animate-slide-reveal {
+    transform: translateY(20px) scale(0.98);
+    filter: blur(2px);
+  }
+
+  .animate-slide-reveal.is-visible {
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+
+  /* Pop Animation - NEW */
+  .animate-pop {
+    transform: scale(0.8);
+  }
+
+  .animate-pop.is-visible {
+    transform: scale(1);
+    transition: opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+      transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Stagger delay utilities - Extended */
+  .delay-0 {
+    transition-delay: 0ms;
+  }
+
+  .delay-100 {
+    transition-delay: 100ms;
+  }
+
+  .delay-150 {
+    transition-delay: 150ms;
+  }
+
+  .delay-200 {
+    transition-delay: 200ms;
+  }
+
+  .delay-250 {
+    transition-delay: 250ms;
+  }
+
+  .delay-300 {
+    transition-delay: 300ms;
+  }
+
+  .delay-350 {
+    transition-delay: 350ms;
+  }
+
+  .delay-400 {
+    transition-delay: 400ms;
+  }
+
+  .delay-450 {
+    transition-delay: 450ms;
+  }
+
+  .delay-500 {
+    transition-delay: 500ms;
+  }
+
+  .delay-600 {
+    transition-delay: 600ms;
+  }
+
+  .delay-700 {
+    transition-delay: 700ms;
+  }
+
+  .delay-800 {
+    transition-delay: 800ms;
+  }
+
+  /* Speed variants */
+  .scroll-animate-ultra-slow {
+    transition-duration: 1.2s;
+  }
+
+  .scroll-animate-slow {
+    transition-duration: 1s;
+  }
+
+  .scroll-animate-normal {
+    transition-duration: 0.8s;
+  }
+
+  .scroll-animate-fast {
+    transition-duration: 0.5s;
+  }
+
+  /* Counter animation number styling */
+  .counter-number {
+    font-variant-numeric: tabular-nums;
+    display: inline-block;
+    min-width: 2ch;
+  }
+
+  /* ================================
+     Marquee/Infinite Scroll Animation
+     ================================ */
+  @keyframes marquee-left {
+    0% {
+      transform: translateX(0%);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes marquee-right {
+    0% {
+      transform: translateX(-50%);
+    }
+
+    100% {
+      transform: translateX(0%);
+    }
+  }
+
+  .animate-marquee-left {
+    animation: marquee-left 25s linear infinite;
+  }
+
+  .animate-marquee-right {
+    animation: marquee-right 25s linear infinite;
+  }
 }

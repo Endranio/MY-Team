@@ -107,6 +107,45 @@ export type Database = {
         }
         Relationships: []
       }
+      info_cards: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          prize_image_url: string | null
+          contact_email: string | null
+          contact_whatsapp: string | null
+          is_active: boolean
+          display_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          prize_image_url?: string | null
+          contact_email?: string | null
+          contact_whatsapp?: string | null
+          is_active?: boolean
+          display_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          prize_image_url?: string | null
+          contact_email?: string | null
+          contact_whatsapp?: string | null
+          is_active?: boolean
+          display_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
