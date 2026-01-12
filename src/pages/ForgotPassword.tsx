@@ -50,7 +50,7 @@ const ForgotPassword = () => {
                                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                                     <Mail className="h-6 w-6 text-primary" />
                                 </div>
-                                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+                                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-green-400 bg-clip-text text-transparent">
                                     Reset Password
                                 </h1>
                                 <p className="text-muted-foreground mt-2 text-center">

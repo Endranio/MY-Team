@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Calendar, Pencil, Trash2, Plus, Loader2 } from "lucide-react";
+import { Calendar, Pencil, Trash2, Plus, Loader2, ImageIcon } from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
 import EventDialog from "@/components/EventDialog";
 import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
@@ -13,8 +13,65 @@ interface Event {
   title: string;
   description: string;
   event_date: string;
-  image_url: string;
+  image_url: string | null;
+  image_url_2: string | null;
+  image_url_3: string | null;
 }
+
+// Multi-image grid component for admin cards
+const EventImageGrid = ({ event }: { event: Event }) => {
+  const images = [event.image_url, event.image_url_2, event.image_url_3].filter(Boolean) as string[];
+
+  // No images
+  if (images.length === 0) {
+    return (
+      <div className="aspect-video bg-muted/30 flex flex-col items-center justify-center">
+        <ImageIcon className="h-12 w-12 text-muted-foreground/30 mb-2" />
+        <p className="text-xs text-muted-foreground">Tidak ada gambar</p>
+      </div>
+    );
+  }
+
+  // 1 image - full width
+  if (images.length === 1) {
+    return (
+      <div className="aspect-video overflow-hidden">
+        <img src={images[0]} alt={event.title} className="w-full h-full object-cover" />
+      </div>
+    );
+  }
+
+  // 2 images - side by side (60% left, 40% right)
+  if (images.length === 2) {
+    return (
+      <div className="aspect-video flex gap-0.5 overflow-hidden">
+        <div className="w-[60%] h-full">
+          <img src={images[0]} alt={`${event.title} - 1`} className="w-full h-full object-cover" />
+        </div>
+        <div className="w-[40%] h-full">
+          <img src={images[1]} alt={`${event.title} - 2`} className="w-full h-full object-cover" />
+        </div>
+      </div>
+    );
+  }
+
+  // 3 images - 60% left + 40% right (2 stacked vertically)
+  return (
+    <div className="aspect-video flex gap-0.5 overflow-hidden">
+      <div className="w-[60%] h-full">
+        <img src={images[0]} alt={`${event.title} - 1`} className="w-full h-full object-cover" />
+      </div>
+      <div className="w-[40%] h-full flex flex-col gap-0.5">
+        <div className="h-1/2">
+          <img src={images[1]} alt={`${event.title} - 2`} className="w-full h-full object-cover" />
+        </div>
+        <div className="h-1/2">
+          <img src={images[2]} alt={`${event.title} - 3`} className="w-full h-full object-cover" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const EventManagement = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -118,13 +175,7 @@ const EventManagement = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
               <Card key={event.id} className="overflow-hidden bg-card border-border hover:border-primary/50 transition-all duration-300">
-                <div className="aspect-video overflow-hidden">
-                  <img
-                    src={event.image_url}
-                    alt={event.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                <EventImageGrid event={event} />
                 <div className="p-6 space-y-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />

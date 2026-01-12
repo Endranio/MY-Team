@@ -866,13 +866,20 @@ const TeamManagement = ({ isAdminPage = false }: TeamManagementProps) => {
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div>
-                                                        <p className="font-medium">{member.profile?.full_name}</p>
+                                                        <p className="font-medium flex items-center gap-2">
+                                                            {member.profile?.full_name}
+                                                            {member.role_in_team === "captain" && (
+                                                                <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 px-1.5 py-0 h-5 text-[10px] md:hidden">
+                                                                    Kapten
+                                                                </Badge>
+                                                            )}
+                                                        </p>
                                                         <p className="text-sm text-muted-foreground">{member.profile?.email}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     {member.role_in_team === "captain" && (
-                                                        <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600">
+                                                        <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 hidden md:inline-flex">
                                                             <Crown className="h-3 w-3 mr-1" />
                                                             Kapten
                                                         </Badge>

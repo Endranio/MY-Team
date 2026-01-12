@@ -25,7 +25,7 @@ const Footer = () => {
                     <div className="space-y-4">
                         <Link to="/" className="flex items-center gap-2">
                             <Gamepad2 className="h-8 w-8 text-primary" />
-                            <h3 className="text-xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+                            <h3 className="text-xl font-bold bg-gradient-to-r from-primary to-green-400 bg-clip-text text-transparent">
                                 MY Team
                             </h3>
                         </Link>

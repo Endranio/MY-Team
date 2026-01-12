@@ -21,7 +21,9 @@ export type Database = {
           description: string
           event_date: string
           id: string
-          image_url: string
+          image_url: string | null
+          image_url_2: string | null
+          image_url_3: string | null
           title: string
           updated_at: string
         }
@@ -31,7 +33,9 @@ export type Database = {
           description: string
           event_date: string
           id?: string
-          image_url: string
+          image_url?: string | null
+          image_url_2?: string | null
+          image_url_3?: string | null
           title: string
           updated_at?: string
         }
@@ -41,7 +45,9 @@ export type Database = {
           description?: string
           event_date?: string
           id?: string
-          image_url?: string
+          image_url?: string | null
+          image_url_2?: string | null
+          image_url_3?: string | null
           title?: string
           updated_at?: string
         }

@@ -41,6 +41,47 @@ type InfoCard = {
   display_order: number;
 };
 
+// EventCard Component - List style to match other dropdowns
+const EventCard = ({ event, index }: { event: Event; index?: number }) => {
+  // Get first available image for thumbnail
+  const thumbnail = event.image_url || event.image_url_2 || event.image_url_3;
+
+  return (
+    <div className="group/item flex items-center gap-4 p-4 transition-all duration-300 hover:bg-primary/5 border border-transparent hover:border-primary/10 w-full">
+      {index !== undefined && (
+        <span className="text-lg font-bold text-muted-foreground/30 group-hover/item:text-primary transition-colors font-mono w-6 text-center">
+          {(index + 1).toString().padStart(2, '0')}
+        </span>
+      )}
+
+      <div className="relative h-12 w-12 rounded-xl bg-muted overflow-hidden flex-shrink-0 ring-2 ring-transparent group-hover/item:ring-primary/20 transition-all">
+        {thumbnail ? (
+          <img src={thumbnail} alt={event.title} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary">
+            <Calendar className="h-5 w-5" />
+          </div>
+        )}
+        {/* Date Badge */}
+        <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground px-1.5 py-0.5 rounded text-[10px] font-bold">
+          {new Date(event.event_date).getDate()}
+        </div>
+      </div>
+
+      <div className="flex-1 text-left min-w-0">
+        <p className="font-semibold truncate text-sm text-foreground/80 group-hover/item:text-primary transition-colors">
+          {event.title}
+        </p>
+        <p className="text-xs text-muted-foreground truncate">
+          {new Date(event.event_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+        </p>
+      </div>
+
+      <ArrowRight className="h-4 w-4 text-muted-foreground/50 group-hover/item:text-primary transition-colors flex-shrink-0" />
+    </div>
+  );
+};
+
 const Index = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -56,76 +97,75 @@ const Index = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch upcoming events
-      const { data: eventsData } = await supabase
-        .from('events')
-        .select('*')
-        .gte('event_date', new Date().toISOString())
-        .order('event_date', { ascending: true })
-        .limit(5);
-      if (eventsData) setEvents(eventsData);
+      // Get today's date in YYYY-MM-DD format for proper comparison
+      const today = new Date().toISOString().split('T')[0];
 
-      // Fetch active teams
-      const { data: teamsData } = await supabase
-        .from('teams')
-        .select('*, profiles!captain_id(full_name)')
-        .eq('status', 'approved')
-        .limit(5);
+      // Fetch all data in parallel for faster loading
+      const [eventsResult, teamsResult, streamsResult, testimonialsResult, infoCardsResult] = await Promise.all([
+        // Fetch all events (no date filter)
+        supabase
+          .from('events')
+          .select('*')
+          .order('event_date', { ascending: false })
+          .limit(10),
 
-      if (teamsData) {
-        const formattedTeams = teamsData.map((t: any) => ({
+        // Fetch active teams
+        supabase
+          .from('teams')
+          .select('*, profiles!captain_id(full_name)')
+          .eq('status', 'approved')
+          .limit(5),
+
+        // Fetch streams
+        supabase
+          .from('streams')
+          .select('*')
+          .order('is_live', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(5),
+
+        // Fetch testimonials
+        supabase
+          .from('testimonials')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(6),
+
+        // Fetch info cards
+        supabase
+          .from('info_cards')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order', { ascending: true })
+          .limit(10)
+      ]);
+
+      // Set events
+      if (eventsResult.data) setEvents(eventsResult.data);
+
+      // Set teams
+      if (teamsResult.data) {
+        const formattedTeams = teamsResult.data.map((t: any) => ({
           ...t,
           captain: t.profiles ? { full_name: t.profiles.full_name } : null
         }));
         setTeams(formattedTeams as Team[]);
       }
 
-      // Fetch streams
-      try {
-        const { data: streamsData } = await supabase
-          .from('streams')
-          .select('*')
-          .order('is_live', { ascending: false })
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        if (streamsData) {
-          setStreams(streamsData as unknown as Stream[]);
-        }
-      } catch (e) {
-        console.log("Streams table might not exist yet");
+      // Set streams
+      if (streamsResult.data) {
+        setStreams(streamsResult.data as unknown as Stream[]);
       }
 
-      // Fetch testimonials
-      try {
-        const { data: testimonialsData } = await supabase
-          .from('testimonials')
-          .select('*')
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(6);
-
-        if (testimonialsData) {
-          setTestimonials(testimonialsData as unknown as Testimonial[]);
-        }
-      } catch (e) {
-        console.log("Testimonials table might not exist yet");
+      // Set testimonials
+      if (testimonialsResult.data) {
+        setTestimonials(testimonialsResult.data as unknown as Testimonial[]);
       }
 
-      // Fetch info cards
-      try {
-        const { data: infoCardsData } = await supabase
-          .from('info_cards')
-          .select('*')
-          .eq('is_active', true)
-          .order('display_order', { ascending: true })
-          .limit(10);
-
-        if (infoCardsData) {
-          setInfoCards(infoCardsData as unknown as InfoCard[]);
-        }
-      } catch (e) {
-        console.log("Info cards table might not exist yet");
+      // Set info cards
+      if (infoCardsResult.data) {
+        setInfoCards(infoCardsResult.data as unknown as InfoCard[]);
       }
     };
     fetchData();
@@ -156,7 +196,7 @@ const Index = () => {
             <AnimatedSection animation="blur-in" delay={0}>
               <h2 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight drop-shadow-2xl">
                 Gabung dengan Ultimate
-                <span className="block bg-gradient-to-r from-primary via-blue-400 to-primary bg-clip-text text-transparent drop-shadow-lg">
+                <span className="block bg-gradient-to-r from-primary via-green-400 to-primary bg-clip-text text-transparent drop-shadow-lg">
                   MY Team
                 </span>
               </h2>
@@ -328,33 +368,11 @@ const Index = () => {
               </div>
 
               {/* Dropdown Content */}
-              <div className="max-h-0 group-hover:max-h-[400px] transition-all duration-500 ease-in-out overflow-hidden bg-muted/30">
+              <div className="max-h-0 group-hover:max-h-[500px] transition-all duration-500 ease-in-out overflow-hidden bg-muted/30">
                 <div className="">
                   {events.length > 0 ? (
                     events.map((event, index) => (
-                      <div
-                        key={event.id}
-                        className="group/item flex items-center gap-4 p-4 transition-all duration-300 hover:bg-primary/5 border border-transparent hover:border-primary/10 w-full"
-                      >
-                        <span className="text-lg font-bold text-muted-foreground/30 group-hover/item:text-primary transition-colors font-mono w-6 text-center">
-                          {(index + 1).toString().padStart(2, '0')}
-                        </span>
-
-                        <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-bold flex-shrink-0 group-hover/item:bg-primary/20 transition-all">
-                          {new Date(event.event_date).getDate()}
-                        </div>
-                        <div className="flex-1 text-left min-w-0">
-                          <p className="font-semibold truncate text-sm text-foreground/80 group-hover/item:text-primary transition-colors">
-                            {event.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground mb-0.5">
-                            {new Date(event.event_date).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground/70 line-clamp-2 leading-tight">
-                            {event.description}
-                          </p>
-                        </div>
-                      </div>
+                      <EventCard key={event.id} event={event} index={index} />
                     ))
                   ) : (
                     <div className="text-center text-muted-foreground py-4 text-sm">

@@ -14,7 +14,9 @@ interface Event {
   title: string;
   description: string;
   event_date: string;
-  image_url: string;
+  image_url: string | null;
+  image_url_2: string | null;
+  image_url_3: string | null;
 }
 
 interface EventDialogProps {
@@ -28,13 +30,23 @@ const EventDialog = ({ open, onOpenChange, event, onSuccess }: EventDialogProps)
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+
+  // State for 3 images
+  const [imageFile1, setImageFile1] = useState<File | null>(null);
+  const [imageFile2, setImageFile2] = useState<File | null>(null);
+  const [imageFile3, setImageFile3] = useState<File | null>(null);
+
+  const [imagePreview1, setImagePreview1] = useState<string>('');
+  const [imagePreview2, setImagePreview2] = useState<string>('');
+  const [imagePreview3, setImagePreview3] = useState<string>('');
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     event_date: '',
     image_url: '',
+    image_url_2: '',
+    image_url_3: '',
   });
 
   useEffect(() => {
@@ -43,23 +55,35 @@ const EventDialog = ({ open, onOpenChange, event, onSuccess }: EventDialogProps)
         title: event.title,
         description: event.description,
         event_date: event.event_date,
-        image_url: event.image_url,
+        image_url: event.image_url || '',
+        image_url_2: event.image_url_2 || '',
+        image_url_3: event.image_url_3 || '',
       });
-      setImagePreview(event.image_url);
-      setImageFile(null);
+      setImagePreview1(event.image_url || '');
+      setImagePreview2(event.image_url_2 || '');
+      setImagePreview3(event.image_url_3 || '');
+      setImageFile1(null);
+      setImageFile2(null);
+      setImageFile3(null);
     } else {
       setFormData({
         title: '',
         description: '',
         event_date: '',
         image_url: '',
+        image_url_2: '',
+        image_url_3: '',
       });
-      setImagePreview('');
-      setImageFile(null);
+      setImagePreview1('');
+      setImagePreview2('');
+      setImagePreview3('');
+      setImageFile1(null);
+      setImageFile2(null);
+      setImageFile3(null);
     }
   }, [event, open]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, imageNumber: 1 | 2 | 3) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -83,12 +107,25 @@ const EventDialog = ({ open, onOpenChange, event, onSuccess }: EventDialogProps)
       return;
     }
 
-    setImageFile(file);
+    // Set appropriate file and preview based on image number
+    if (imageNumber === 1) {
+      setImageFile1(file);
+    } else if (imageNumber === 2) {
+      setImageFile2(file);
+    } else {
+      setImageFile3(file);
+    }
 
     // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImagePreview(reader.result as string);
+      if (imageNumber === 1) {
+        setImagePreview1(reader.result as string);
+      } else if (imageNumber === 2) {
+        setImagePreview2(reader.result as string);
+      } else {
+        setImagePreview3(reader.result as string);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -126,15 +163,19 @@ const EventDialog = ({ open, onOpenChange, event, onSuccess }: EventDialogProps)
     setUploading(true);
 
     try {
-      let imageUrl = formData.image_url;
+      let imageUrl1 = formData.image_url;
+      let imageUrl2 = formData.image_url_2;
+      let imageUrl3 = formData.image_url_3;
 
-      // Upload new image if file is selected
-      if (imageFile) {
-        imageUrl = await uploadImage(imageFile);
+      // Upload new images if files are selected
+      if (imageFile1) {
+        imageUrl1 = await uploadImage(imageFile1);
       }
-
-      if (!imageUrl) {
-        throw new Error('Image is required');
+      if (imageFile2) {
+        imageUrl2 = await uploadImage(imageFile2);
+      }
+      if (imageFile3) {
+        imageUrl3 = await uploadImage(imageFile3);
       }
 
       if (event) {
@@ -145,7 +186,9 @@ const EventDialog = ({ open, onOpenChange, event, onSuccess }: EventDialogProps)
             title: formData.title,
             description: formData.description,
             event_date: formData.event_date,
-            image_url: imageUrl,
+            image_url: imageUrl1 || null,
+            image_url_2: imageUrl2 || null,
+            image_url_3: imageUrl3 || null,
           })
           .eq('id', event.id);
 
@@ -163,7 +206,9 @@ const EventDialog = ({ open, onOpenChange, event, onSuccess }: EventDialogProps)
             title: formData.title,
             description: formData.description,
             event_date: formData.event_date,
-            image_url: imageUrl,
+            image_url: imageUrl1 || null,
+            image_url_2: imageUrl2 || null,
+            image_url_3: imageUrl3 || null,
             created_by: user.id,
           });
 
@@ -189,17 +234,100 @@ const EventDialog = ({ open, onOpenChange, event, onSuccess }: EventDialogProps)
     }
   };
 
-  const clearImage = () => {
-    setImageFile(null);
-    setImagePreview(event?.image_url || '');
-    if (!event?.image_url) {
-      setFormData({ ...formData, image_url: '' });
+  const clearImage = (imageNumber: 1 | 2 | 3) => {
+    if (imageNumber === 1) {
+      setImageFile1(null);
+      setImagePreview1(event?.image_url || '');
+      if (!event?.image_url) {
+        setFormData({ ...formData, image_url: '' });
+      }
+    } else if (imageNumber === 2) {
+      setImageFile2(null);
+      setImagePreview2(event?.image_url_2 || '');
+      if (!event?.image_url_2) {
+        setFormData({ ...formData, image_url_2: '' });
+      }
+    } else {
+      setImageFile3(null);
+      setImagePreview3(event?.image_url_3 || '');
+      if (!event?.image_url_3) {
+        setFormData({ ...formData, image_url_3: '' });
+      }
     }
+  };
+
+  const renderImageUploadSection = (
+    imageNumber: 1 | 2 | 3,
+    preview: string,
+    label: string
+  ) => {
+    const inputId = `image-upload-${imageNumber}`;
+    const replaceId = `image-replace-${imageNumber}`;
+
+    return (
+      <div className="space-y-2">
+        <Label htmlFor={inputId}>{label}</Label>
+        {preview ? (
+          <div className="relative group">
+            <img
+              src={preview}
+              alt={`Preview ${imageNumber}`}
+              className="w-full h-40 object-cover rounded-md border border-border"
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-md">
+              <Label
+                htmlFor={replaceId}
+                className="cursor-pointer bg-white text-black px-4 py-2 rounded-md hover:bg-white/90 transition-colors flex items-center gap-2 text-sm"
+              >
+                <Upload className="h-4 w-4" />
+                Ganti
+              </Label>
+              <Input
+                id={replaceId}
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileChange(e, imageNumber)}
+                className="hidden"
+              />
+            </div>
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+              onClick={() => clearImage(imageNumber)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="border-2 border-dashed border-border rounded-md p-6 text-center hover:border-primary/50 transition-colors">
+            <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+            <Label
+              htmlFor={inputId}
+              className="cursor-pointer text-sm text-muted-foreground hover:text-primary"
+            >
+              Klik untuk upload gambar
+              <Input
+                id={inputId}
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileChange(e, imageNumber)}
+                className="hidden"
+              />
+            </Label>
+            <p className="text-xs text-muted-foreground mt-1">
+              JPG, PNG, WEBP (Max. 5MB)
+            </p>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto custom-scrollbar bg-card border-border">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto custom-scrollbar bg-card border-border">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             {event ? 'Edit Event' : 'Buat Event Baru'}
@@ -241,70 +369,15 @@ const EventDialog = ({ open, onOpenChange, event, onSuccess }: EventDialogProps)
             />
           </div>
 
-          {/* Image Upload Section */}
-          <div className="space-y-2">
-            <Label htmlFor="image">Gambar Event</Label>
-            {imagePreview ? (
-              <div className="relative group">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full h-48 object-cover rounded-md border border-border"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-md">
-                  <Label
-                    htmlFor="image-replace"
-                    className="cursor-pointer bg-white text-black px-4 py-2 rounded-md hover:bg-white/90 transition-colors flex items-center gap-2"
-                  >
-                    <Upload className="h-4 w-4" />
-                    Ganti Gambar
-                  </Label>
-                  <Input
-                    id="image-replace"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => {
-                    setImageFile(null);
-                    setImagePreview('');
-                    setFormData({ ...formData, image_url: '' });
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <div className="border-2 border-dashed border-border rounded-md p-8 text-center hover:border-primary/50 transition-colors">
-                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <Label
-                  htmlFor="image-upload"
-                  className="cursor-pointer text-sm text-muted-foreground hover:text-primary"
-                >
-                  Klik untuk upload gambar
-                  <Input
-                    id="image-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </Label>
-                <p className="text-xs text-muted-foreground mt-1">
-                  JPG, PNG, WEBP (Max. 5MB)
-                </p>
-              </div>
-            )}
-            {!imagePreview && !event && (
-              <p className="text-sm text-muted-foreground">* Gambar wajib diupload</p>
-            )}
+          {/* Image Upload Sections */}
+          <div className="space-y-4 border-t border-border pt-4">
+            <div className="text-sm text-muted-foreground">
+              Upload gambar event (opsional, maksimal 3 gambar)
+            </div>
+
+            {renderImageUploadSection(1, imagePreview1, 'Gambar 1 (Opsional)')}
+            {renderImageUploadSection(2, imagePreview2, 'Gambar 2 (Opsional)')}
+            {renderImageUploadSection(3, imagePreview3, 'Gambar 3 (Opsional)')}
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0">
@@ -316,7 +389,7 @@ const EventDialog = ({ open, onOpenChange, event, onSuccess }: EventDialogProps)
             >
               Batal
             </Button>
-            <Button type="submit" disabled={loading || (!imagePreview && !formData.image_url)}>
+            <Button type="submit" disabled={loading}>
               {uploading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {event ? 'Update Event' : 'Buat Event'}
             </Button>
