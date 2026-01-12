@@ -119,7 +119,7 @@ const Register = () => {
         <Card className="w-full max-w-md p-8 bg-card border-border shadow-2xl">
           <div className="flex flex-col items-center mb-8">
             <Gamepad2 className="h-12 w-12 text-primary mb-4" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-green-400 bg-clip-text text-transparent">
               Join MY Team
             </h1>
             <p className="text-muted-foreground mt-2">Create your account and start gaming</p>
