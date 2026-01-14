@@ -88,7 +88,10 @@ const Navbar = () => {
 
             {/* Mobile Menu - Full Screen Overlay with Solid Background */}
             <div
-                className={`md:hidden fixed inset-x-0 top-[73px] bottom-0 z-50 transition-all duration-300 ease-out`}
+                className={`md:hidden fixed inset-x-0 top-[73px] bottom-0 z-50 transition-all duration-300 ease-out ${mobileMenuOpen
+                        ? 'opacity-100 translate-y-0 pointer-events-auto'
+                        : 'opacity-0 -translate-y-4 pointer-events-none'
+                    }`}
                 style={{ backgroundColor: '#0d141f' }}
             >
                 <nav className="h-full flex flex-col px-6 py-8" >
