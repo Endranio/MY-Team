@@ -40,6 +40,14 @@ type InfoCard = {
   is_active: boolean;
   display_order: number;
 };
+type Sponsor = {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  description: string | null;
+  is_active: boolean;
+  display_order: number;
+};
 
 // EventCard Component - List style to match other dropdowns
 const EventCard = ({ event, index }: { event: Event; index?: number }) => {
@@ -88,6 +96,7 @@ const Index = () => {
   const [streams, setStreams] = useState<Stream[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [infoCards, setInfoCards] = useState<InfoCard[]>([]);
+  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
 
   // Scroll animation refs
   const featuresRef = useScrollAnimation<HTMLDivElement>({ threshold: 0.1 });
@@ -101,7 +110,7 @@ const Index = () => {
       const today = new Date().toISOString().split('T')[0];
 
       // Fetch all data in parallel for faster loading
-      const [eventsResult, teamsResult, streamsResult, testimonialsResult, infoCardsResult] = await Promise.all([
+      const [eventsResult, teamsResult, streamsResult, testimonialsResult, infoCardsResult, sponsorsResult] = await Promise.all([
         // Fetch all events (no date filter)
         supabase
           .from('events')
@@ -138,7 +147,14 @@ const Index = () => {
           .select('*')
           .eq('is_active', true)
           .order('display_order', { ascending: true })
-          .limit(10)
+          .limit(10),
+
+        // Fetch sponsors
+        supabase
+          .from('sponsors')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order', { ascending: true })
       ]);
 
       // Set events
@@ -166,6 +182,11 @@ const Index = () => {
       // Set info cards
       if (infoCardsResult.data) {
         setInfoCards(infoCardsResult.data as unknown as InfoCard[]);
+      }
+
+      // Set sponsors
+      if (sponsorsResult.data) {
+        setSponsors(sponsorsResult.data as unknown as Sponsor[]);
       }
     };
     fetchData();
@@ -615,7 +636,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Sponsors Section */}
+      {/* Sponsors Section - Always show with professional handling */}
       <section className="py-12 sm:py-20 overflow-hidden bg-muted/20">
         <div ref={ctaRef.ref} className="container mx-auto px-3 sm:px-4">
           <AnimatedSection animation="fade-up" className="text-center mb-8 sm:mb-12">
@@ -626,75 +647,98 @@ const Index = () => {
           </AnimatedSection>
         </div>
 
-        {/* Infinite Scroll Marquee - Row 1 (Left to Right) */}
-        <div
-          className={cn(
-            "relative w-full scroll-animate animate-fade-up",
-            ctaRef.isVisible && "is-visible"
-          )}
-          style={{ transitionDelay: '100ms' }}
-        >
-          <div className="flex animate-marquee-left hover:[animation-play-state:paused]">
-            {[...Array(2)].map((_, setIndex) => (
-              <div key={setIndex} className="flex shrink-0">
-                {/* Sponsor Items */}
-                <div className="flex items-center justify-center mx-6 sm:mx-10 w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group">
-                  <div className="text-2xl sm:text-3xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors">SPONSOR 1</div>
-                </div>
-                <div className="flex items-center justify-center mx-6 sm:mx-10 w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group">
-                  <div className="text-2xl sm:text-3xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors">SPONSOR 2</div>
-                </div>
-                <div className="flex items-center justify-center mx-6 sm:mx-10 w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group">
-                  <div className="text-2xl sm:text-3xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors">SPONSOR 3</div>
-                </div>
-                <div className="flex items-center justify-center mx-6 sm:mx-10 w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group">
-                  <div className="text-2xl sm:text-3xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors">SPONSOR 4</div>
-                </div>
-                <div className="flex items-center justify-center mx-6 sm:mx-10 w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group">
-                  <div className="text-2xl sm:text-3xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors">SPONSOR 5</div>
+        {sponsors.length === 0 ? (
+          /* No sponsors - show "coming soon" style placeholder */
+          <div
+            className={cn(
+              "container mx-auto px-3 sm:px-4 scroll-animate animate-fade-up",
+              ctaRef.isVisible && "is-visible"
+            )}
+            style={{ transitionDelay: '100ms' }}
+          >
+            <div className="flex justify-center">
+              <div className="flex items-center justify-center w-48 sm:w-56 h-24 sm:h-32 bg-card/30 backdrop-blur-sm rounded-xl border border-dashed border-border/50 text-muted-foreground/50">
+                <div className="text-center">
+                  <p className="text-sm font-medium">Segera Hadir</p>
+                  <p className="text-xs mt-1">Coming Soon</p>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
-          {/* Gradient Overlays for smooth fade effect */}
-          <div className="absolute inset-y-0 left-0 w-20 sm:w-40 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
-          <div className="absolute inset-y-0 right-0 w-20 sm:w-40 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
-        </div>
-
-        {/* Infinite Scroll Marquee - Row 2 (Right to Left) */}
-        <div
-          className={cn(
-            "relative w-full mt-4 sm:mt-6 scroll-animate animate-fade-up",
-            ctaRef.isVisible && "is-visible"
-          )}
-          style={{ transitionDelay: '200ms' }}
-        >
-          <div className="flex animate-marquee-right hover:[animation-play-state:paused]">
-            {[...Array(2)].map((_, setIndex) => (
-              <div key={setIndex} className="flex shrink-0">
-                {/* Sponsor Items */}
-                <div className="flex items-center justify-center mx-6 sm:mx-10 w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group">
-                  <div className="text-2xl sm:text-3xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors">SPONSOR 6</div>
+        ) : sponsors.length <= 3 ? (
+          /* Few sponsors (1-3) - show in static centered grid */
+          <div
+            className={cn(
+              "container mx-auto px-3 sm:px-4 scroll-animate animate-fade-up",
+              ctaRef.isVisible && "is-visible"
+            )}
+            style={{ transitionDelay: '100ms' }}
+          >
+            <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
+              {sponsors.map((sponsor, index) => (
+                <div
+                  key={sponsor.id}
+                  className={cn(
+                    "flex items-center justify-center w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group p-3 scroll-animate animate-scale-in",
+                    ctaRef.isVisible && "is-visible"
+                  )}
+                  style={{ transitionDelay: `${100 + index * 100}ms` }}
+                  title={sponsor.name}
+                >
+                  {sponsor.logo_url ? (
+                    <img
+                      src={sponsor.logo_url}
+                      alt={sponsor.name}
+                      className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="text-lg sm:text-xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors text-center">
+                      {sponsor.name}
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center justify-center mx-6 sm:mx-10 w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group">
-                  <div className="text-2xl sm:text-3xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors">SPONSOR 7</div>
-                </div>
-                <div className="flex items-center justify-center mx-6 sm:mx-10 w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group">
-                  <div className="text-2xl sm:text-3xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors">SPONSOR 8</div>
-                </div>
-                <div className="flex items-center justify-center mx-6 sm:mx-10 w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group">
-                  <div className="text-2xl sm:text-3xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors">SPONSOR 9</div>
-                </div>
-                <div className="flex items-center justify-center mx-6 sm:mx-10 w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group">
-                  <div className="text-2xl sm:text-3xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors">SPONSOR 10</div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-          {/* Gradient Overlays for smooth fade effect */}
-          <div className="absolute inset-y-0 left-0 w-20 sm:w-40 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
-          <div className="absolute inset-y-0 right-0 w-20 sm:w-40 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
-        </div>
+        ) : (
+          /* Many sponsors (4+) - show infinite scroll marquee */
+          <div
+            className={cn(
+              "relative w-full scroll-animate animate-fade-up",
+              ctaRef.isVisible && "is-visible"
+            )}
+            style={{ transitionDelay: '100ms' }}
+          >
+            <div className="flex animate-marquee-left hover:[animation-play-state:paused]">
+              {[...Array(3)].map((_, setIndex) => (
+                <div key={setIndex} className="flex shrink-0">
+                  {sponsors.map((sponsor) => (
+                    <div
+                      key={`${setIndex}-${sponsor.id}`}
+                      className="flex items-center justify-center mx-6 sm:mx-10 w-32 sm:w-44 h-20 sm:h-28 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10 group p-3"
+                      title={sponsor.name}
+                    >
+                      {sponsor.logo_url ? (
+                        <img
+                          src={sponsor.logo_url}
+                          alt={sponsor.name}
+                          className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="text-lg sm:text-xl font-bold text-muted-foreground/40 group-hover:text-primary/60 transition-colors text-center">
+                          {sponsor.name}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            {/* Gradient Overlays for smooth fade effect */}
+            <div className="absolute inset-y-0 left-0 w-20 sm:w-40 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
+            <div className="absolute inset-y-0 right-0 w-20 sm:w-40 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+          </div>
+        )}
       </section>
 
       {/* Footer */}

@@ -19,6 +19,7 @@ import MyReferrals from "./pages/MyReferrals";
 import TeamManagement from "./pages/TeamManagement";
 import AdminTeamApproval from "./pages/AdminTeamApproval";
 import AdminMyTeam from "./pages/AdminMyTeam";
+import SponsorManagement from "./pages/SponsorManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -87,6 +88,11 @@ const App = () => (
             <Route path="/team" element={
               <ProtectedRoute>
                 <TeamManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/sponsors" element={
+              <ProtectedRoute requireAdmin>
+                <SponsorManagement />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
