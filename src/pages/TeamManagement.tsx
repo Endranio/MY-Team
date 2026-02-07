@@ -31,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
 import Header from "@/components/header";
+import TeamAnnouncements from "@/components/TeamAnnouncements";
 
 type Team = Tables<"teams">;
 type TeamMember = Tables<"team_members">;
@@ -851,10 +852,13 @@ const TeamManagement = ({ isAdminPage = false }: TeamManagementProps) => {
                             {/* Team Members */}
                             {myTeam.status === "approved" && (
                                 <div>
-                                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                        <Users className="h-4 w-4" />
-                                        Anggota Tim ({teamMembers.length})
-                                    </h4>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h4 className="font-semibold flex items-center gap-2">
+                                            <Users className="h-4 w-4" />
+                                            Anggota Tim ({teamMembers.length})
+                                        </h4>
+                                        <TeamAnnouncements teamId={myTeam.id} isCaptain={isCaptain} />
+                                    </div>
                                     <div className="space-y-2">
                                         {teamMembers.map((member) => (
                                             <div key={member.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">

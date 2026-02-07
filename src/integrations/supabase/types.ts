@@ -332,6 +332,33 @@ export type Database = {
         }
         Relationships: []
       }
+      team_announcements: {
+        Row: {
+          id: string
+          team_id: string
+          created_by: string
+          message: string
+          image_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          team_id: string
+          created_by: string
+          message: string
+          image_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          team_id?: string
+          created_by?: string
+          message?: string
+          image_url?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
