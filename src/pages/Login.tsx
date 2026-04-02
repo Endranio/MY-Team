@@ -10,7 +10,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const Login = () => {
-  const { signIn, user, isAdmin, loading: authLoading } = useAuth();
+  const { signIn, user, isAdmin, loading: authLoading, roleLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -18,18 +18,13 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    // Only redirect after auth is loaded and user is logged in
-    if (user && !authLoading) {
-      // Delay to ensure isAdmin is set from async checkAdminRole
-      const timer = setTimeout(() => {
-        const redirectPath = isAdmin ? '/admin' : '/dashboard';
-        console.log('Redirecting to:', redirectPath, 'isAdmin:', isAdmin);
-        navigate(redirectPath);
-      }, 500); // Increased delay to wait for role check
-
-      return () => clearTimeout(timer);
+    // Only redirect after both auth AND role check are fully loaded
+    if (user && !authLoading && !roleLoading) {
+      const redirectPath = isAdmin ? '/admin' : '/dashboard';
+      console.log('Redirecting to:', redirectPath, 'isAdmin:', isAdmin);
+      navigate(redirectPath);
     }
-  }, [user, isAdmin, authLoading, navigate]);
+  }, [user, isAdmin, authLoading, roleLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
