@@ -1,9 +1,37 @@
-import { Gamepad2, Mail, MessageCircle } from "lucide-react";
+import { Gamepad2, Phone, Loader2 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
+
+type Contact = Tables<"contacts">;
 
 const Footer = () => {
     const location = useLocation();
     const isHomePage = location.pathname === "/";
+    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [loadingContacts, setLoadingContacts] = useState(true);
+
+    useEffect(() => {
+        const fetchContacts = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from("contacts")
+                    .select("*")
+                    .order("created_at", { ascending: true });
+                
+                if (!error && data) {
+                    setContacts(data);
+                }
+            } catch (error) {
+                console.error("Error fetching contacts:", error);
+            } finally {
+                setLoadingContacts(false);
+            }
+        };
+
+        fetchContacts();
+    }, []);
 
     const scrollToSection = (sectionId: string) => {
         if (!isHomePage) {
@@ -88,12 +116,26 @@ const Footer = () => {
                     <div className="space-y-4">
                         <h4 className="font-semibold text-lg">Contact Us</h4>
                         <div className="space-y-3">
-                            <div className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                                <Mail className="h-5 w-5 flex-shrink-0" />
-                                <a href="mailto:anjasraharjo12345@gmail.com" className="break-all">
-                                    anjasraharjo12345@gmail.com
-                                </a>
-                            </div>
+                            {loadingContacts ? (
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <span>Memuat kontak...</span>
+                                </div>
+                            ) : contacts.length > 0 ? (
+                                contacts.map((contact) => (
+                                    <div key={contact.id} className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
+                                        <Phone className="h-5 w-5 flex-shrink-0" />
+                                        <a href={`https://wa.me/${contact.phone}`} target="_blank" rel="noopener noreferrer" className="break-all flex flex-col">
+                                            <span className="font-medium text-foreground">{contact.name}</span>
+                                            <span className="text-sm">{contact.phone}</span>
+                                        </a>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-muted-foreground text-sm">
+                                    Belum ada informasi kontak.
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
