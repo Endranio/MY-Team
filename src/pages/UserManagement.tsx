@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createClient } from '@supabase/supabase-js';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -189,7 +190,21 @@ const UserManagement = () => {
     setNewUserLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // Create a temporary Supabase client that does NOT persist sessions.
+      // This way, signUp creates the user without replacing the admin's active session.
+      const tempClient = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            storageKey: 'temp-create-user', // Separate storage key to avoid conflicts
+          },
+        }
+      );
+
+      const { data, error } = await tempClient.auth.signUp({
         email: newUser.email,
         password: newUser.password,
         options: {
@@ -202,17 +217,25 @@ const UserManagement = () => {
 
       if (error) throw error;
 
-      if (data.user) {
-        if (newUser.role === 'admin') {
-          await supabase
-            .from('user_roles')
-            .insert([{ user_id: data.user.id, role: 'admin' }]);
+      // Assign role using the MAIN supabase client (still has admin session)
+      if (data.user && newUser.role === 'admin') {
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert([{ user_id: data.user.id, role: 'admin' }]);
+
+        if (roleError) {
+          console.error('Failed to assign admin role:', roleError);
+          toast({
+            variant: "destructive",
+            title: "Peringatan",
+            description: "User dibuat tapi gagal set role admin. Silakan ubah role secara manual.",
+          });
         }
       }
 
       toast({
         title: "User berhasil dibuat!",
-        description: "Silakan cek email untuk verifikasi (jika aktif).",
+        description: `Akun untuk ${newUser.fullName} telah berhasil dibuat.`,
       });
 
       setAddUserOpen(false);
